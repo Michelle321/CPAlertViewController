@@ -134,15 +134,21 @@ open class CPAlertViewController: UIViewController {
             contentView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-margin-[button]-margin-|", options: NSLayoutFormatOptions(rawValue: 0), metrics: ["margin": kWidthMargin], views: ["button": lastButton]))
         } else {
             let firstButton = buttons.first!
-            contentView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-margin-[firstButton]-space-[lastButton(==firstButton)]-margin-|", options: NSLayoutFormatOptions.alignAllCenterY, metrics: ["margin": kWidthMargin, "space": kButtonHoriSpace], views: ["firstButton": firstButton, "lastButton": lastButton]))
+            let firstButtonTitleWidth = firstButton.titleLabel?.textRect(forBounds: CGRect.init(x: 0, y: 0, width: 1000, height: 20), limitedToNumberOfLines: 1).width ?? 0.0
+            let lastButtonTitleWidth = lastButton.titleLabel?.textRect(forBounds: CGRect.init(x: 0, y: 0, width: 1000, height: 20), limitedToNumberOfLines: 1).width ?? 0.0
+           
+            contentView.addConstraint(NSLayoutConstraint.init(item: firstButton, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal, toItem: lastButton, attribute: NSLayoutAttribute.width, multiplier: 1, constant: firstButtonTitleWidth - lastButtonTitleWidth))
+            
+            contentView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-margin-[firstButton]-space-[lastButton]-margin-|", options: NSLayoutFormatOptions.alignAllCenterY, metrics: ["margin": kWidthMargin, "space": kButtonHoriSpace], views: ["firstButton": firstButton, "lastButton": lastButton]))
         }
         
         contentView.addConstraint(NSLayoutConstraint(item: imageView, attribute: .centerX, relatedBy: .equal, toItem: contentView, attribute: .centerX, multiplier: 1.0, constant: 0))
         
-        contentView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-margin-[imageView]-imageSpace-[label]-labelSpace-[textView]-textViewSpace-[button]-margin-|", options: NSLayoutFormatOptions(rawValue: 0), metrics: ["margin": kHeightMargin, "imageSpace": imageViewSpace, "labelSpace": titleLabelSpace, "textViewSpace": messageTextViewSpace], views: ["label": titleLabel, "textView": messageTextView, "button": lastButton, "imageView": imageView]))
+        contentView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-margin-[imageView]-imageSpace-[label]-labelSpace-[textView(<=260)]-textViewSpace-[button]-margin-|", options: NSLayoutFormatOptions(rawValue: 0), metrics: ["margin": kHeightMargin, "imageSpace": imageViewSpace, "labelSpace": titleLabelSpace, "textViewSpace": messageTextViewSpace], views: ["label": titleLabel, "textView": messageTextView, "button": lastButton, "imageView": imageView]))
         
-        titleLabel.setContentHuggingPriority(UILayoutPriorityRequired, for: .vertical)
-        messageTextView.setContentHuggingPriority(UILayoutPriorityRequired, for: .vertical)
+        titleLabel.setContentHuggingPriority(UILayoutPriority.required, for: .vertical)
+        messageTextView.setContentHuggingPriority(UILayoutPriority.required, for: .vertical)
+        
     }
     
     fileprivate func setupImageView(_ style: CPAlertStyle) {
